@@ -131,7 +131,7 @@ export default function Footer() {
                   </div>
                   <div className="contact-item-clean">
                     <span className="item-label">Phone / WhatsApp</span>
-                    <a href="tel:7569428709" className="item-value">+91 75694 28709</a>
+                    <a href="tel:8332010218" className="item-value">+91 83320 10218</a>
                   </div>
                   <div className="online-badge">
                     <span className="pulse-dot"></span>

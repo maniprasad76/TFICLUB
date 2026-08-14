@@ -37,11 +37,10 @@ export interface OrderShippedEvent {
  *
  * Listens for order lifecycle events and dispatches notifications.
  *
- * Transport is config-driven (CRIT 4):
- *   NOTIFICATION_PROVIDER=console   → log the message payload (default, dev-safe)
- *   NOTIFICATION_PROVIDER=http      → POST to WHATSAPP_API_URL with
- *                                     `Authorization: Bearer WHATSAPP_API_TOKEN`
- *                                     body: { to: phone, body: message }
+ * Transport is config-driven:
+ *   - EMAIL_API_URL + EMAIL_API_TOKEN → POST { to, subject, body } with a
+ *     Bearer token (works with Resend, Postmark, Brevo, or any HTTP email API)
+ *   - otherwise → logs the payload (safe default, no external dependency)
  *
  * Delivery is best-effort: failures are logged and never break the order flow.
  */
@@ -60,15 +59,6 @@ export class NotificationService {
     this.logger.log(
       `📬 order.confirmed event — order=${event.orderNumber} customer=${event.customerEmail}`,
     );
-
-    // Attempt WhatsApp notification if phone is available
-    if (event.customerPhone) {
-      await this.sendOrderConfirmationWhatsApp(event);
-    } else {
-      this.logger.warn(
-        `⚠️ No phone number for order ${event.orderNumber} — skipping WhatsApp notification`,
-      );
-    }
   }
 
   @OnEvent('order.shipped', { async: true })
@@ -77,15 +67,6 @@ export class NotificationService {
       `🚚 order.shipped event — order=${event.orderNumber} customer=${event.customerEmail}`,
     );
 
-    // Dispatch to every channel we have contact details for (best-effort).
-    // SMS/WhatsApp (phone) + email — failures on one channel never block the other.
-    if (event.customerPhone) {
-      await this.sendOrderShippedWhatsApp(event);
-    } else {
-      this.logger.warn(
-        `⚠️ No phone number for order ${event.orderNumber} — skipping SMS/WhatsApp notification`,
-      );
-    }
     if (event.customerEmail) {
       await this.sendOrderShippedEmail(event);
     } else {
@@ -96,55 +77,15 @@ export class NotificationService {
   }
 
   // ─────────────────────────────────────────────────────────
-  // WHATSAPP NOTIFICATION
+  // EMAIL NOTIFICATION
   // ─────────────────────────────────────────────────────────
-
-  /**
-   * Send an order confirmation via WhatsApp.
-   * Composes the message and delegates to the transport layer.
-   */
-  private async sendOrderConfirmationWhatsApp(event: OrderConfirmedEvent) {
-    const message = this.composeOrderConfirmationMessage(event);
-
-    try {
-      await this.sendWhatsAppMessage(event.customerPhone!, message);
-      this.logger.log(
-        `✅ WhatsApp notification sent for order ${event.orderNumber} → ${event.customerPhone}`,
-      );
-    } catch (err: any) {
-      // Non-blocking: log error but don't fail the order flow
-      this.logger.error(
-        `❌ WhatsApp notification failed for order ${event.orderNumber}: ${err.message}`,
-      );
-    }
-  }
-
-  /**
-   * Send the "order shipped" message via the SMS/WhatsApp transport.
-   * Includes the tracking ID and a link to the storefront tracking page.
-   */
-  private async sendOrderShippedWhatsApp(event: OrderShippedEvent) {
-    const message = this.composeOrderShippedMessage(event);
-
-    try {
-      await this.sendWhatsAppMessage(event.customerPhone!, message);
-      this.logger.log(
-        `✅ SMS/WhatsApp shipment notification sent for order ${event.orderNumber} → ${event.customerPhone}`,
-      );
-    } catch (err: any) {
-      // Non-blocking: log error but don't fail the order flow
-      this.logger.error(
-        `❌ SMS/WhatsApp shipment notification failed for order ${event.orderNumber}: ${err.message}`,
-      );
-    }
-  }
 
   /**
    * Send the "order shipped" email via the configured email transport.
    * Config-driven (EMAIL_API_URL + EMAIL_API_TOKEN); falls back to console.
    */
   private async sendOrderShippedEmail(event: OrderShippedEvent) {
-    const subject = `🚚 Your FANCLUB order ${event.orderNumber} has shipped!`;
+    const subject = `🚚 Your FanClub order ${event.orderNumber} has shipped!`;
     const body = this.composeOrderShippedMessage(event).replace(/\*/g, '');
 
     try {
@@ -158,23 +99,6 @@ export class NotificationService {
         `❌ Email shipment notification failed for order ${event.orderNumber}: ${err.message}`,
       );
     }
-  }
-
-  /**
-   * Compose the WhatsApp message body for order confirmation.
-   */
-  private composeOrderConfirmationMessage(event: OrderConfirmedEvent): string {
-    return [
-      `🎉 Order Confirmed!`,
-      ``,
-      `Hi ${event.customerName || 'there'},`,
-      `Your order *${event.orderNumber}* has been confirmed.`,
-      ``,
-      `💰 Amount: ₹${Number(event.totalAmount).toLocaleString('en-IN')}`,
-      `📦 Estimated Delivery: ${event.estimatedDelivery}`,
-      ``,
-      `Thank you for shopping with FAN Club! 🏆`,
-    ].join('\n');
   }
 
   /**
@@ -198,64 +122,13 @@ export class NotificationService {
       lines.push(``, `🔗 Track your order: ${event.trackingUrl}`);
     }
 
-    lines.push(``, `Thank you for shopping with FAN Club! 🏆`);
+    lines.push(``, `Thank you for shopping with FanClub! 🏆`);
     return lines.join('\n');
   }
 
   // ─────────────────────────────────────────────────────────
   // TRANSPORT LAYER
   // ─────────────────────────────────────────────────────────
-
-  /**
-   * Send a WhatsApp message to the given phone number.
-   *
-   * Config-driven (CRIT 4):
-   *   - NOTIFICATION_PROVIDER=http + WHATSAPP_API_URL + WHATSAPP_API_TOKEN
-   *     → real HTTP delivery to any provider that accepts
-   *       { to, body } with a Bearer token (Meta Cloud API, Twilio, Gupshup…)
-   *   - otherwise → logs the payload (safe default, no external dependency)
-   */
-  private async sendWhatsAppMessage(
-    phone: string,
-    message: string,
-  ): Promise<void> {
-    const provider = this.configService.get<string>(
-      'NOTIFICATION_PROVIDER',
-      'console',
-    );
-
-    if (provider.toLowerCase() !== 'http') {
-      this.logger.log(`📱 [console] WhatsApp message to ${phone}:\n${message}`);
-      return;
-    }
-
-    const apiUrl = this.configService.get<string>('WHATSAPP_API_URL');
-    const apiToken = this.configService.get<string>('WHATSAPP_API_TOKEN');
-
-    if (!apiUrl || !apiToken) {
-      this.logger.warn(
-        'NOTIFICATION_PROVIDER=http but WHATSAPP_API_URL/WHATSAPP_API_TOKEN missing — falling back to console',
-      );
-      this.logger.log(`📱 [console] WhatsApp message to ${phone}:\n${message}`);
-      return;
-    }
-
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiToken}`,
-      },
-      body: JSON.stringify({ to: phone, body: message }),
-    });
-
-    if (!response.ok) {
-      const detail = await response.text().catch(() => '');
-      throw new Error(
-        `WhatsApp API responded ${response.status} ${response.statusText} ${detail.slice(0, 200)}`,
-      );
-    }
-  }
 
   /**
    * Send an email to the given address.

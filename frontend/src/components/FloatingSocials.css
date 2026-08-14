@@ -1,6 +1,6 @@
 .floating-socials-container {
   position: fixed;
-  bottom: 80px; /* Above the mobile nav */
+  bottom: 24px;
   right: 24px;
   z-index: 998;
   display: flex;

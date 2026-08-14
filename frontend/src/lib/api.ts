@@ -204,10 +204,17 @@ api.get = function deduplicatedGet(url: string, config?: any) {
 
 export const SOCIAL_LINKS = {
   instagram: "https://instagram.com/fanclub",
-  whatsapp: "https://wa.me/917569428709",
+  whatsapp: "https://wa.me/918332010218",
   facebook: "https://facebook.com/fanclub",
   youtube: "https://youtube.com/@fanclub",
   twitter: "https://twitter.com/fanclub",
+};
+
+export const CONTACT_INFO = {
+  phone: "+91 8332010218",
+  displayPhone: "+91 83320 10218",
+  rawPhone: "8332010218",
+  whatsappUrl: "https://wa.me/918332010218",
 };
 
 export default api;

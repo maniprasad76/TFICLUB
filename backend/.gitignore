@@ -10,3 +10,6 @@ node_modules
 
 # Upload migration audit logs
 scripts/migrate-uploads-*.jsonl
+
+# WhatsApp Baileys session files (auth credentials)
+whatsapp-session/

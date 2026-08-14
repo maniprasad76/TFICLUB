@@ -140,7 +140,7 @@ export default function Contact() {
                     gap: "8px",
                   }}
                 >
-                  +91 7569428709
+                  +91 8332010218
                 </p>
               </div>
             </div>

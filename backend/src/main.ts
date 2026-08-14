@@ -183,18 +183,17 @@ async function bootstrap() {
     logger.log(`📚 Swagger docs disabled in production`);
   }
 
-  const host =
-    env === 'production' || process.env.RENDER ? '0.0.0.0' : 'localhost';
+  const host = process.env.HOST || '0.0.0.0';
   await app.listen(port, host);
 
-  logger.log(`🎬 FAN Backend v1.0.0 running on http://${host}:${port}`);
+  logger.log(`🎬 FAN Backend v1.0.0 running on http://localhost:${port}`);
   logger.log(`   Environment: ${env}`);
   logger.log(`   Node: ${process.version}`);
   logger.log(
     `   CORS origins: ${uniqueOrigins.join(', ') || '(none — rejecting all)'}`,
   );
   logger.log(`   Security headers: ✅ Helmet enabled`);
-  logger.log(`   API docs: http://${host}:${port}/api/docs`);
+  logger.log(`   API docs: http://localhost:${port}/api/docs`);
 }
 
 // ── Process-level safety net ──

@@ -7,15 +7,15 @@ import { NotificationService, OrderShippedEvent } from './notification.service';
  */
 describe('NotificationService', () => {
   let service: NotificationService;
-  let sendSpy: jest.SpyInstance;
+  let emailSpy: jest.SpyInstance;
 
   beforeEach(() => {
     service = new NotificationService({
       get: jest.fn((_key: string, fallback?: unknown) => fallback),
     } as any);
 
-    sendSpy = jest
-      .spyOn(service as any, 'sendWhatsAppMessage')
+    emailSpy = jest
+      .spyOn(service as any, 'sendEmailMessage')
       .mockResolvedValue(undefined);
   });
 
@@ -29,31 +29,16 @@ describe('NotificationService', () => {
     trackingUrl: 'https://fanclub.example/orders/order-1',
   };
 
-  it('sends a shipment notification containing the tracking ID and tracking link', async () => {
-    await (service as any).handleOrderShipped(shippedEvent);
-
-    expect(sendSpy).toHaveBeenCalledTimes(1);
-    const [phone, message] = sendSpy.mock.calls[0];
-    expect(phone).toBe('+919000000000');
-    expect(message).toContain('Order Has Shipped');
-    expect(message).toContain('TRK-12345');
-    expect(message).toContain('https://fanclub.example/orders/order-1');
-  });
-
-  it('does not attempt delivery when no phone number is available', async () => {
+  it('does not attempt delivery when no email address is available', async () => {
     await (service as any).handleOrderShipped({
       ...shippedEvent,
-      customerPhone: null,
+      customerEmail: '',
     });
 
-    expect(sendSpy).not.toHaveBeenCalled();
+    expect(emailSpy).not.toHaveBeenCalled();
   });
 
   it('sends an email with the tracking link when an email address is available', async () => {
-    const emailSpy = jest
-      .spyOn(service as any, 'sendEmailMessage')
-      .mockResolvedValue(undefined);
-
     await (service as any).handleOrderShipped(shippedEvent);
 
     expect(emailSpy).toHaveBeenCalledTimes(1);

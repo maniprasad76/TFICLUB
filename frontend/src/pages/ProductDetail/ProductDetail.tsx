@@ -18,6 +18,7 @@ import {
   Ruler,
   Package,
   MapPin,
+  MessageSquare,
 } from "lucide-react";
 import AnimatedPage from "../../components/AnimatedPage";
 import ProductCard from "../../components/ProductCard/ProductCard";
@@ -487,6 +488,29 @@ export default function ProductDetail() {
                   >
                     Buy It Now
                   </button>
+                  <a
+                    href={`https://wa.me/918332010218?text=${encodeURIComponent(`Hi FAN CLUB! I'm interested in ${product.name} (₹${product.price}). Can you help me order?`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-stacked"
+                    style={{
+                      background: "#25d366",
+                      color: "#ffffff",
+                      border: "2px solid var(--bauhaus-black, #000)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
+                      fontWeight: 800,
+                      textDecoration: "none",
+                      textTransform: "uppercase",
+                      boxShadow: "4px 4px 0px 0px var(--bauhaus-black, #000)",
+                      cursor: "pointer"
+                    }}
+                  >
+                    <MessageSquare size={18} />
+                    <span>Order / Inquire on WhatsApp</span>
+                  </a>
                 </div>
 
                 {/* Size Chart Link */}
@@ -784,7 +808,6 @@ export default function ProductDetail() {
         {/* Floating Glassmorphic CTA */}
         <div 
           className={`floating-action-bar ${isScrolled ? "visible" : ""}`}
-          style={isMobile ? { bottom: "var(--mobile-nav-height)", borderTop: "3px solid var(--bauhaus-black)", background: "var(--bg-card)", boxShadow: "0 -4px 10px rgba(0, 0, 0, 0.05)", borderRadius: 0, padding: "8px 16px" } : {}}
         >
           <div className="floating-info">
             {displayImages[0] && (

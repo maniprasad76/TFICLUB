@@ -6,6 +6,7 @@ import {
   BadgeCheck,
   Camera,
   Loader2,
+  LogIn
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -186,8 +187,8 @@ export default function ProductReviews({ product, setProduct, user, slug }: any)
                 <Edit3 size={18} /> Write a Review
               </button>
             ) : (
-              <Link to="/login" className="btn btn-ghost">
-                Login to Review
+              <Link to="/login" className="btn btn-outline">
+                <LogIn size={18} /> Login to Review
               </Link>
             )}
           </div>

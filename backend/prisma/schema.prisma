@@ -8,21 +8,21 @@ datasource db {
 }
 
 model User {
-  id               String            @id @default(uuid())
-  email            String            @unique
-  name             String?
-  phone            String?
-  avatar           String?
-  role             Role              @default(USER)
-  authId           String            @unique
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  addresses        Address[]
-  cartItems        CartItem[]
-  orders           Order[]
-  reviews          Review[]
-  wishlists        Wishlist[]
-  loyaltyProgress  LoyaltyProgress?
+  id              String           @id @default(uuid())
+  email           String           @unique
+  name            String?
+  phone           String?
+  avatar          String?
+  role            Role             @default(USER)
+  authId          String           @unique
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  addresses       Address[]
+  cartItems       CartItem[]
+  orders          Order[]
+  reviews         Review[]
+  wishlists       Wishlist[]
+  loyaltyProgress LoyaltyProgress?
 
   @@index([role])
   @@map("users")
@@ -62,34 +62,34 @@ model Category {
 }
 
 model Product {
-  id               String           @id @default(uuid())
-  name             String
-  slug             String           @unique
-  description      String
-  price            Decimal          @db.Decimal(10, 2)
-  comparePrice     Decimal?         @db.Decimal(10, 2)
-  images           String[]
-  sizes            String[]
-  colors           String[]
-  categoryId       String
-  stock            Int              @default(0)
-  featured         Boolean          @default(false)
-  bestseller       Boolean          @default(false)
-  newArrival       Boolean          @default(false)
-  rating           Float            @default(0)
-  reviewCount      Int              @default(0)
-  tags             String[]
-  gender           Gender           @default(UNISEX)
-  isActive         Boolean          @default(true)
-  loyaltyEligible  Boolean          @default(false)
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  cartItems        CartItem[]
-  orderItems       OrderItem[]
-  category         Category         @relation(fields: [categoryId], references: [id])
-  reviews          Review[]
-  wishlists        Wishlist[]
-  loyaltyRewards   LoyaltyReward[]
+  id              String          @id @default(uuid())
+  name            String
+  slug            String          @unique
+  description     String
+  price           Decimal         @db.Decimal(10, 2)
+  comparePrice    Decimal?        @db.Decimal(10, 2)
+  images          String[]
+  sizes           String[]
+  colors          String[]
+  categoryId      String
+  stock           Int             @default(0)
+  featured        Boolean         @default(false)
+  bestseller      Boolean         @default(false)
+  newArrival      Boolean         @default(false)
+  rating          Float           @default(0)
+  reviewCount     Int             @default(0)
+  tags            String[]
+  gender          Gender          @default(UNISEX)
+  isActive        Boolean         @default(true)
+  loyaltyEligible Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  cartItems       CartItem[]
+  orderItems      OrderItem[]
+  category        Category        @relation(fields: [categoryId], references: [id])
+  reviews         Review[]
+  wishlists       Wishlist[]
+  loyaltyRewards  LoyaltyReward[]
 
   @@index([categoryId])
   @@index([featured])
@@ -123,18 +123,18 @@ model CartItem {
 }
 
 model Order {
-  id                   String                @id @default(uuid())
-  orderNumber          String                @unique @default(uuid())
-  idempotencyKey       String?               @unique
-  userId               String
-  totalAmount          Decimal               @db.Decimal(10, 2)
-  shippingAmount       Decimal               @default(0) @db.Decimal(10, 2)
-  discountAmount       Decimal               @default(0) @db.Decimal(10, 2)
-  couponCode           String?
-  addressId            String?
-  paymentMethod        String?
-  paymentId            String?
-  razorpayOrderId      String?
+  id              String  @id @default(uuid())
+  orderNumber     String  @unique @default(uuid())
+  idempotencyKey  String? @unique
+  userId          String
+  totalAmount     Decimal @db.Decimal(10, 2)
+  shippingAmount  Decimal @default(0) @db.Decimal(10, 2)
+  discountAmount  Decimal @default(0) @db.Decimal(10, 2)
+  couponCode      String?
+  addressId       String?
+  paymentMethod   String?
+  paymentId       String?
+  razorpayOrderId String?
 
   status               OrderStatus           @default(PENDING)
   trackingId           String?
@@ -348,12 +348,12 @@ model AuditLog {
   id         String   @id @default(uuid())
   userId     String?
   userEmail  String?
-  action     String   // e.g. "CREATE_PRODUCT", "UPDATE_PRODUCT", "DELETE_PRODUCT", "REFUND_PAYMENT", "UPDATE_SETTING"
-  targetId   String?  // ID of the modified entity
-  targetType String?  // e.g. "PRODUCT", "CATEGORY", "PAYMENT", "SETTING"
+  action     String // e.g. "CREATE_PRODUCT", "UPDATE_PRODUCT", "DELETE_PRODUCT", "REFUND_PAYMENT", "UPDATE_SETTING"
+  targetId   String? // ID of the modified entity
+  targetType String? // e.g. "PRODUCT", "CATEGORY", "PAYMENT", "SETTING"
   ipAddress  String?
   userAgent  String?
-  changes    Json?    // stores old vs new value or description of changes
+  changes    Json? // stores old vs new value or description of changes
   createdAt  DateTime @default(now())
 
   @@index([userId])
@@ -366,7 +366,7 @@ model AuditLog {
 model Coupon {
   id            String    @id @default(uuid())
   code          String    @unique
-  discountType  String    // "PERCENTAGE" | "FIXED"
+  discountType  String // "PERCENTAGE" | "FIXED"
   value         Decimal   @db.Decimal(10, 2)
   minCartAmount Decimal?  @db.Decimal(10, 2)
   maxDiscount   Decimal?  @db.Decimal(10, 2)
@@ -436,4 +436,3 @@ model LoyaltyCountedOrder {
   @@index([loyaltyProgressId])
   @@map("loyalty_counted_orders")
 }
-

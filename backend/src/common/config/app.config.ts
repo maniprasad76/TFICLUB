@@ -46,3 +46,4 @@ export default registerAs('app', () => ({
     password: process.env.ADMIN_PASSWORD || '',
   },
 }));
+

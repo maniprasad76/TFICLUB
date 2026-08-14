@@ -42,3 +42,4 @@ yarn-error.log*
 # IDE / Agent temp files
 .claude/
 .codex/
+.mcp.json
